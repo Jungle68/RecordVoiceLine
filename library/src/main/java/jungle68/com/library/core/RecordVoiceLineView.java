@@ -11,7 +11,6 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import jungle68.com.library.R;
@@ -57,12 +56,11 @@ public class RecordVoiceLineView extends View {
     private int mFineness = 1;
     private float mTargetVolume = 1;
 
-
-    private long mSpeedY = 50;
+    private long mSpeedY = 80;
     private float mRectWidth = 25;
     private float mRectSpace = 5;
     private float mRectInitHeight = 4;
-    private List<Rect> mRectList;
+    private List<Rect> mRectList = new ArrayList<>();
 
     private long mLastTime = 0;
     private int mLineSpeed = 90;
@@ -85,61 +83,59 @@ public class RecordVoiceLineView extends View {
         initData();
     }
 
-    private void initData() {
-        switch (mMode) {
-            case LINE:
-                if (mMiddleLinePaint == null) {
-                    mMiddleLinePaint = new Paint();
-                    mMiddleLinePaint.setColor(mMiddleLineColor);
-                    mMiddleLinePaint.setAntiAlias(true);
-                }
-                break;
-            case RECT:
-                if (mPaintVoicLine == null) {
-                    mPaintVoicLine = new Paint();
-                    mPaintVoicLine.setColor(mVoiceLineColor);
-                    mPaintVoicLine.setAntiAlias(true);
-                    mPaintVoicLine.setStyle(Paint.Style.STROKE);
-                    mPaintVoicLine.setStrokeWidth(2);
-                }
-                break;
-            default:
-
-        }
-
-
-    }
-
     private void initAtts(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.RecordVoiceLineView);
-        mMode = typedArray.getInt(R.styleable.RecordVoiceLineView_viewMode, LINE);
-        mVoiceLineColor = typedArray.getColor(R.styleable.RecordVoiceLineView_voiceLine, DEFAULT_VOICE_LINE_COLOR);
-        mMaxVolume = typedArray.getFloat(R.styleable.RecordVoiceLineView_maxVolume, 100);
-        mSensibility = typedArray.getInt(R.styleable.RecordVoiceLineView_sensibility, 4);
-        if (mMode == RECT) {
-            mRectWidth = typedArray.getDimension(R.styleable.RecordVoiceLineView_rectWidth, 25);
-            mRectSpace = typedArray.getDimension(R.styleable.RecordVoiceLineView_rectSpace, 5);
-            mRectInitHeight = typedArray.getDimension(R.styleable.RecordVoiceLineView_rectInitHeight, 4);
-        } else {
-            mMiddleLineColor = typedArray.getColor(R.styleable.RecordVoiceLineView_middleLine, DEFAULT_MIDDELE_LINE_COLOR);
-            mMiddleLineHeight = typedArray.getDimension(R.styleable.RecordVoiceLineView_middleLineHeight, 4);
-            mLineSpeed = typedArray.getInt(R.styleable.RecordVoiceLineView_lineSpeed, 90);
-            mFineness = typedArray.getInt(R.styleable.RecordVoiceLineView_fineness, 1);
+        mMode = typedArray.getInt(R.styleable.RecordVoiceLineView_jungle68_viewMode, LINE);
+        mVoiceLineColor = typedArray.getColor(R.styleable.RecordVoiceLineView_jungle68_voiceLine, DEFAULT_VOICE_LINE_COLOR);
+        mMaxVolume = typedArray.getFloat(R.styleable.RecordVoiceLineView_jungle68_maxVolume, 100);
+        mSensibility = typedArray.getInt(R.styleable.RecordVoiceLineView_jungle68_sensibility, 4);
+        switch (mMode) {
+            case RECT:
+                mRectWidth = typedArray.getDimensionPixelOffset(R.styleable.RecordVoiceLineView_jungle68_rectWidth, 25);
+                mRectSpace = typedArray.getDimensionPixelOffset(R.styleable.RecordVoiceLineView_jungle68_rectSpace, 5);
+                mRectInitHeight = typedArray.getDimensionPixelOffset(R.styleable.RecordVoiceLineView_jungle68_rectInitHeight, 4);
+                break;
+            case LINE:
+                mMiddleLineColor = typedArray.getColor(R.styleable.RecordVoiceLineView_jungle68_middleLine, DEFAULT_MIDDELE_LINE_COLOR);
+                mMiddleLineHeight = typedArray.getDimensionPixelOffset(R.styleable.RecordVoiceLineView_jungle68_middleLineHeight, 4);
+                mLineSpeed = typedArray.getInt(R.styleable.RecordVoiceLineView_jungle68_lineSpeed, 90);
+                mFineness = typedArray.getInt(R.styleable.RecordVoiceLineView_jungle68_fineness, 1);
+                break;
+            default:
+        }
+        typedArray.recycle();
+    }
+
+    private void initData() {
+        if (mMode == LINE) {
+            mMiddleLinePaint = new Paint();
+            mMiddleLinePaint.setColor(mMiddleLineColor);
+            mMiddleLinePaint.setAntiAlias(true);
             mPaths = new ArrayList<>(20);
             for (int i = 0; i < 20; i++) {
                 mPaths.add(new Path());
             }
         }
-        typedArray.recycle();
+        mPaintVoicLine = new Paint();
+        mPaintVoicLine.setColor(mVoiceLineColor);
+        mPaintVoicLine.setAntiAlias(true);
+        mPaintVoicLine.setStrokeCap(Paint.Cap.ROUND);
+        mPaintVoicLine.setStyle(Paint.Style.FILL);
+
+
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mMode == RECT) {
-            drawVoiceRect(canvas);
-        } else {
-            drawMiddleLine(canvas);
-            drawVoiceLine(canvas);
+        switch (mMode) {
+            case RECT:
+                drawVoiceRect(canvas);
+                break;
+            case LINE:
+                drawMiddleLine(canvas);
+                drawVoiceLine(canvas);
+                break;
+            default:
         }
         run();
     }
@@ -179,24 +175,21 @@ public class RecordVoiceLineView extends View {
     }
 
     private void drawVoiceRect(Canvas canvas) {
-        if (mPaintVoicLine == null) {
-            mPaintVoicLine = new Paint();
-            mPaintVoicLine.setColor(mVoiceLineColor);
-            mPaintVoicLine.setAntiAlias(true);
-            mPaintVoicLine.setStyle(Paint.Style.FILL_AND_STROKE);
-            mPaintVoicLine.setStrokeWidth(2);
-        }
-        if (mRectList == null) {
-            mRectList = new LinkedList<>();
-        }
         int totalWidth = (int) (mRectSpace + mRectWidth);
         if (mSpeedY % totalWidth < 6) {
-            Rect rect = new Rect((int) (-mRectWidth - 10 - mSpeedY + mSpeedY % totalWidth),
-                    (int) (getHeight() / 2 - mRectInitHeight / 2 - (mVolume == 10 ? 0 : mVolume / 2)),
-                    (int) (-10 - mSpeedY + mSpeedY % totalWidth),
-                    (int) (getHeight() / 2 + mRectInitHeight / 2 + (mVolume == 10 ? 0 : mVolume / 2)));
+            Rect rect;
             if (mRectList.size() > getWidth() / (mRectSpace + mRectWidth) + 2) {
+                rect = mRectList.get(0);
+                rect.set((int) (-mRectWidth - 10 - mSpeedY + mSpeedY % totalWidth),
+                        (int) (getHeight() / 2 - mRectInitHeight / 2 - (mVolume == 10 ? 0 : mVolume / 2)),
+                        (int) (-10 - mSpeedY + mSpeedY % totalWidth),
+                        (int) (getHeight() / 2 + mRectInitHeight / 2 + (mVolume == 10 ? 0 : mVolume / 2)));
                 mRectList.remove(0);
+            } else {
+                rect = new Rect((int) (-mRectWidth - 10 - mSpeedY + mSpeedY % totalWidth),
+                        (int) (getHeight() / 2 - mRectInitHeight / 2 - (mVolume == 10 ? 0 : mVolume / 2)),
+                        (int) (-10 - mSpeedY + mSpeedY % totalWidth),
+                        (int) (getHeight() / 2 + mRectInitHeight / 2 + (mVolume == 10 ? 0 : mVolume / 2)));
             }
             mRectList.add(rect);
         }
@@ -261,10 +254,15 @@ public class RecordVoiceLineView extends View {
     }
 
     public void run() {
-        if (mMode == RECT) {
-            postInvalidateDelayed(30);
-        } else {
-            invalidate();
+        switch (mMode) {
+            case RECT:
+                postInvalidateDelayed(60);
+                break;
+            case LINE:
+                invalidate();
+                break;
+            default:
+
         }
     }
 

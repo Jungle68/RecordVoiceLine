@@ -11,33 +11,16 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:background="@android:color/white"
-        voiceView:fineness="three"
-        voiceView:lineSpeed="200"
-        voiceView:maxVolume="200"
-        voiceView:middleLineHeight="1dp"
-        voiceView:rectSpace="2dp"
-        voiceView:rectWidth="5dp"
-        voiceView:sensibility="four"
-        voiceView:viewMode="rect"
-        voiceView:voiceLine="@color/colorAccent"/>
+        voiceView:jungle68_fineness="three"
+        voiceView:jungle68_lineSpeed="60"
+        voiceView:jungle68_maxVolume="200"
+        voiceView:jungle68_middleLineHeight="1dp"
+        voiceView:jungle68_rectSpace="2dp"
+        voiceView:jungle68_rectWidth="3dp"
+        voiceView:jungle68_sensibility="four"
+        voiceView:jungle68_viewMode="rect"
+        voiceView:jungle68_voiceLine="@color/colorAccent"/>
 
-
-    <!--<jungle68.com.library.core.RecordVoiceLineView-->
-    <!--android:id="@+id/voicLine2"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="200dp"-->
-    <!--android:layout_below="@id/voicLine"-->
-    <!--android:layout_marginTop="30dp"-->
-    <!--android:background="@android:color/white"-->
-    <!--voiceView:fineness="three"-->
-    <!--voiceView:lineSpeed="200"-->
-    <!--voiceView:maxVolume="200"-->
-    <!--voiceView:middleLineHeight="1dp"-->
-    <!--voiceView:rectSpace="2dp"-->
-    <!--voiceView:rectWidth="5dp"-->
-    <!--voiceView:sensibility="four"-->
-    <!--voiceView:viewMode="line"-->
-    <!--voiceView:voiceLine="@android:color/holo_green_dark"/>-->
 
     <Button
         android:id="@+id/bt_record"

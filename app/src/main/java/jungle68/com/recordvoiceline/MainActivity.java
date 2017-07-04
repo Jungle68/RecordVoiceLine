@@ -8,6 +8,8 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -21,16 +23,29 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
 import jungle68.com.library.core.RecordVoiceLineView;
 
-public class MainActivity extends AppCompatActivity implements Runnable {
+public class MainActivity extends AppCompatActivity implements Runnable, View.OnClickListener {
     private MediaRecorder mMediaRecorder;
     private boolean isAlive = true;
     private RecordVoiceLineView voiceLineView;
     private RecordVoiceLineView voicLine2;
+    private Button mBtPlay;
+    private Button mBtRecord;
+
+    private boolean isStop = true;
+    private Thread thread;
+
     List<Integer> voiceDatas = new ArrayList<>();
+    private RxPermissions rxPermissions;
+
+
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
+            if(msg.arg1!=0){
+                voiceLineView.setVolume(msg.arg1);
+                return;
+            }
             if (mMediaRecorder == null) return;
             double ratio = (double) mMediaRecorder.getMaxAmplitude() / 100;
             double db = 0;// 分贝
@@ -41,7 +56,8 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                 db = 20 * Math.log10(ratio);
             //只要有一个线程，不断调用这个方法，就可以使波形变化
             //主要，这个方法必须在ui线程中调用
-            int voiceValue = (int) (db + Math.random() * 100);
+//            int voiceValue = (int) (db + Math.random() * 100);
+            int voiceValue = (int) (db);
             voiceDatas.add(voiceValue);
             voiceLineView.setVolume(voiceValue);
 //            voicLine2.setVolume(voiceValue);
@@ -54,8 +70,14 @@ public class MainActivity extends AppCompatActivity implements Runnable {
         setContentView(R.layout.activity_main);
 
         voiceLineView = (RecordVoiceLineView) findViewById(R.id.voicLine);
-//        voicLine2 = (RecordVoiceLineView) findViewById(R.id.voicLine2);
-        RxPermissions rxPermissions = new RxPermissions(this);
+        mBtRecord = (Button) findViewById(R.id.bt_record);
+        mBtRecord.setOnClickListener(this);
+        mBtPlay = (Button) findViewById(R.id.bt_play);
+        mBtPlay.setOnClickListener(this);
+        rxPermissions = new RxPermissions(this);
+    }
+
+    private void requestPermission(RxPermissions rxPermissions) {
         rxPermissions
                 .request(Manifest.permission.RECORD_AUDIO)
                 .subscribe(new Consumer<Boolean>() {
@@ -63,38 +85,40 @@ public class MainActivity extends AppCompatActivity implements Runnable {
                     public void accept(@NonNull Boolean aBoolean) throws Exception {
                         if (aBoolean) { // Always true pre-M
                             initRecord();
+                            isStop = false;
                         } else {
                             // 需要打开权限
-                            Toast.makeText(MainActivity.this,"需要打开录音权限",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "需要打开录音权限", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
 
     private void initRecord() {
-        if (mMediaRecorder == null)
+        if (mMediaRecorder == null) {
             mMediaRecorder = new MediaRecorder();
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
-        mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        File file = new File(Environment.getExternalStorageDirectory().getPath(), "hello.log");
-        if (!file.exists()) {
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
+            mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            File file = new File(Environment.getExternalStorageDirectory().getPath(), "hello.log");
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            mMediaRecorder.setOutputFile(file.getAbsolutePath());
+            mMediaRecorder.setMaxDuration(1000 * 60 * 10);
             try {
-                file.createNewFile();
+                mMediaRecorder.prepare();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        mMediaRecorder.setOutputFile(file.getAbsolutePath());
-        mMediaRecorder.setMaxDuration(1000 * 60 * 10);
-        try {
-            mMediaRecorder.prepare();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         mMediaRecorder.start();
 
-        Thread thread = new Thread(this);
+        thread = new Thread(this);
         thread.start();
     }
 
@@ -109,12 +133,52 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     @Override
     public void run() {
         while (isAlive) {
-            handler.sendEmptyMessage(0);
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!isStop) {
+                handler.sendEmptyMessage(0);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.bt_record:
+                if (isStop) {
+                    requestPermission(rxPermissions);
+                    mBtRecord.setText("STOP");
+                } else {
+                    isStop = true;
+                    mBtRecord.setText("RECORD");
+                }
+                break;
+            case R.id.bt_play:
+                Thread thread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i = 0; i < voiceDatas.size(); i++) {
+                            try {
+                                Thread.sleep(100);
+                                Message msg = Message.obtain();
+                                msg.arg1 = voiceDatas.get(i);
+                                handler.sendMessage(msg);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+                thread.start();
+
+
+                break;
+
+            default:
+
         }
     }
 }
