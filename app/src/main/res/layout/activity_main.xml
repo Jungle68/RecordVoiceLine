@@ -1,19 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="jungle68.com.recordvoiceline.MainActivity">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:voiceView="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@color/colorAccent"
+              android:orientation="vertical">
 
-    <TextView
+    <jungle68.com.library.core.RecordVoiceLineView
+        android:id="@+id/voicLine"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@android:color/white"
+        voiceView:fineness="three"
+        voiceView:lineSpeed="200"
+        voiceView:maxVolume="200"
+        voiceView:middleLineHeight="1dp"
+        voiceView:rectSpace="2dp"
+        voiceView:rectWidth="5dp"
+        voiceView:sensibility="four"
+        voiceView:viewMode="rect"
+        voiceView:voiceLine="@android:color/white"/>
+
+
+    <!--<jungle68.com.library.core.RecordVoiceLineView-->
+    <!--android:id="@+id/voicLine2"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="200dp"-->
+    <!--android:layout_below="@id/voicLine"-->
+    <!--android:layout_marginTop="30dp"-->
+    <!--android:background="@android:color/white"-->
+    <!--voiceView:fineness="three"-->
+    <!--voiceView:lineSpeed="200"-->
+    <!--voiceView:maxVolume="200"-->
+    <!--voiceView:middleLineHeight="1dp"-->
+    <!--voiceView:rectSpace="2dp"-->
+    <!--voiceView:rectWidth="5dp"-->
+    <!--voiceView:sensibility="four"-->
+    <!--voiceView:viewMode="line"-->
+    <!--voiceView:voiceLine="@android:color/holo_green_dark"/>-->
+
+    <Button
+        android:id="@+id/bt_record"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        android:layout_gravity="center_horizontal"
+        android:text="Record"
+        />
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+        android:id="@+id/bt_play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Play"
+        />
+</LinearLayout>
