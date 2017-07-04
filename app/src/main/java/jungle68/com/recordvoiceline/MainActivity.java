@@ -1,18 +1,24 @@
 package jungle68.com.recordvoiceline;
 
 
+import android.Manifest;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
+
+import com.tbruyelle.rxpermissions2.RxPermissions;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import jungle68.com.library.core.RecordVoiceLineView;
 
 public class MainActivity extends AppCompatActivity implements Runnable {
@@ -46,11 +52,28 @@ public class MainActivity extends AppCompatActivity implements Runnable {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         voiceLineView = (RecordVoiceLineView) findViewById(R.id.voicLine);
 //        voicLine2 = (RecordVoiceLineView) findViewById(R.id.voicLine2);
+        RxPermissions rxPermissions = new RxPermissions(this);
+        rxPermissions
+                .request(Manifest.permission.RECORD_AUDIO)
+                .subscribe(new Consumer<Boolean>() {
+                    @Override
+                    public void accept(@NonNull Boolean aBoolean) throws Exception {
+                        if (aBoolean) { // Always true pre-M
+                            initRecord();
+                        } else {
+                            // 需要打开权限
+                            Toast.makeText(MainActivity.this,"需要打开录音权限",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    private void initRecord() {
         if (mMediaRecorder == null)
             mMediaRecorder = new MediaRecorder();
-
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AMR_NB);
         mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);

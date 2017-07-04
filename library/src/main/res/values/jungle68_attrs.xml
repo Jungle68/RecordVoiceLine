@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="voiceView">
+    <declare-styleable name="RecordVoiceLineView">
         <!--中间线的颜色，就是波形的时候，大家可以看到，中间有一条直线，就是那个-->
         <attr name="middleLine" format="color" />
         <!--中间线的高度，因为宽度是充满的-->

@@ -19,7 +19,7 @@
         voiceView:rectWidth="5dp"
         voiceView:sensibility="four"
         voiceView:viewMode="rect"
-        voiceView:voiceLine="@android:color/white"/>
+        voiceView:voiceLine="@color/colorAccent"/>
 
 
     <!--<jungle68.com.library.core.RecordVoiceLineView-->
